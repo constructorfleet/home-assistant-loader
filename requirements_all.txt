@@ -4,7 +4,6 @@
 # homeassistant.components.homekit
 HAP-python==3.2.0
 
-# homeassistant.auth.mfa_modules.totp
 # homeassistant.components.homekit
 PyQRCode==1.2.1
 
