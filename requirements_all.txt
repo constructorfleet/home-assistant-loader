@@ -1,6 +1,9 @@
 # Home Assistant Core, full dependency set
 -r requirements.txt
 
+# Home Assistant Loaded Components
+-r requirements_components.txt
+
 # homeassistant.components.homekit
 HAP-python==3.2.0
 
