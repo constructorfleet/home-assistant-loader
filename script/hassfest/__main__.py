@@ -7,7 +7,6 @@ from time import monotonic
 from . import (
     codeowners,
     config_flow,
-    coverage,
     dependencies,
     dhcp,
     json,
@@ -34,9 +33,7 @@ INTEGRATION_PLUGINS = [
     zeroconf,
     dhcp,
 ]
-HASS_PLUGINS = [
-    coverage,
-]
+HASS_PLUGINS = []
 
 
 def valid_integration_path(integration_path):
