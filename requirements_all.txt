@@ -164,3 +164,6 @@ zigpy==0.32.0
 zwave-js-server-python==0.17.2
 
 pyMetno==0.8.1
+
+ha-ffmpeg==3.0.2
+
