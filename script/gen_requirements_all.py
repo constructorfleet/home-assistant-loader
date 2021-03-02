@@ -320,8 +320,8 @@ def gather_constraints():
             sorted(
                 {
                     *core_requirements(),
-                    *gather_recursive_requirements("default_config"),
-                    *gather_recursive_requirements("mqtt"),
+                    # *gather_recursive_requirements("default_config"),
+                    # *gather_recursive_requirements("mqtt"),
                 }
             )
             + [""]
