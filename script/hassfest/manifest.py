@@ -102,7 +102,7 @@ MANIFEST_SCHEMA = vol.Schema(
         vol.Optional("after_dependencies"): [str],
         vol.Required("codeowners"): [str],
         vol.Optional("disabled"): str
-    }, extra=vol.Remove
+    }, extra=vol.REMOVE_EXTRA
 )
 
 CUSTOM_INTEGRATION_MANIFEST_SCHEMA = MANIFEST_SCHEMA.extend(
