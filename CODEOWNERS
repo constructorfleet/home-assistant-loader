@@ -158,7 +158,7 @@ homeassistant/components/flunearyou/* @bachya
 homeassistant/components/forked_daapd/* @uvjustin
 homeassistant/components/fortios/* @kimfrellsen
 homeassistant/components/foscam/* @skgsergio
-homeassistant/components/freebox/* @snoof85 @Quentame
+homeassistant/components/freebox/* @hacf-fr @Quentame
 homeassistant/components/fronius/* @nielstron
 homeassistant/components/frontend/* @home-assistant/frontend
 homeassistant/components/garmin_connect/* @cyberjunky
@@ -260,8 +260,10 @@ homeassistant/components/luftdaten/* @fabaff
 homeassistant/components/lupusec/* @majuss
 homeassistant/components/lutron/* @JonGilmore
 homeassistant/components/lutron_caseta/* @swails @bdraco
+homeassistant/components/lyric/* @timmo001
 homeassistant/components/mastodon/* @fabaff
 homeassistant/components/matrix/* @tinloaf
+homeassistant/components/mazda/* @bdr99
 homeassistant/components/mcp23017/* @jardiamj
 homeassistant/components/media_source/* @hunterjm
 homeassistant/components/mediaroom/* @dgomes
@@ -285,8 +287,9 @@ homeassistant/components/motion_blinds/* @starkillerOG
 homeassistant/components/mpd/* @fabaff
 homeassistant/components/mqtt/* @home-assistant/core @emontnemery
 homeassistant/components/msteams/* @peroyvind
+homeassistant/components/my/* @home-assistant/core
 homeassistant/components/myq/* @bdraco
-homeassistant/components/mysensors/* @MartinHjelmare
+homeassistant/components/mysensors/* @MartinHjelmare @functionpointer
 homeassistant/components/mystrom/* @fabaff
 homeassistant/components/neato/* @dshokouhi @Santobert
 homeassistant/components/nederlandse_spoorwegen/* @YarmoM
@@ -310,7 +313,7 @@ homeassistant/components/notion/* @bachya
 homeassistant/components/nsw_fuel_station/* @nickw444
 homeassistant/components/nsw_rural_fire_service_feed/* @exxamalte
 homeassistant/components/nuheat/* @bdraco
-homeassistant/components/nuki/* @pschmitt @pvizeli
+homeassistant/components/nuki/* @pschmitt @pvizeli @pree
 homeassistant/components/numato/* @clssn
 homeassistant/components/number/* @home-assistant/core @Shulyaka
 homeassistant/components/nut/* @bdraco
@@ -455,7 +458,7 @@ homeassistant/components/syncthru/* @nielstron
 homeassistant/components/synology_dsm/* @hacf-fr @Quentame @mib1185
 homeassistant/components/synology_srm/* @aerialls
 homeassistant/components/syslog/* @fabaff
-homeassistant/components/tado/* @michaelarnauts @bdraco
+homeassistant/components/tado/* @michaelarnauts @bdraco @noltari
 homeassistant/components/tag/* @balloob @dmulcahey
 homeassistant/components/tahoma/* @philklei
 homeassistant/components/tankerkoenig/* @guillempages
@@ -477,7 +480,6 @@ homeassistant/components/toon/* @frenck
 homeassistant/components/totalconnect/* @austinmroczek
 homeassistant/components/tplink/* @rytilahti @thegardenmonkey
 homeassistant/components/traccar/* @ludeeus
-homeassistant/components/tradfri/* @ggravlingen
 homeassistant/components/trafikverket_train/* @endor-force
 homeassistant/components/trafikverket_weatherstation/* @endor-force
 homeassistant/components/transmission/* @engrbm87 @JPHutchins

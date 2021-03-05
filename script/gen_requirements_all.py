@@ -28,7 +28,6 @@ COMMENT_REQUIREMENTS = (
     "evdev",
     "face_recognition",
     "i2csense",
-    "nuimo",
     "opencv-python-headless",
     "py_noaa",
     "pybluez",
@@ -321,8 +320,8 @@ def gather_constraints():
             sorted(
                 {
                     *core_requirements(),
-                    *gather_recursive_requirements("default_config"),
-                    *gather_recursive_requirements("mqtt"),
+                    # *gather_recursive_requirements("default_config"),
+                    # *gather_recursive_requirements("mqtt"),
                 }
             )
             + [""]

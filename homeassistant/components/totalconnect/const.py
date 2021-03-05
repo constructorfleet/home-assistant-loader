@@ -1,3 +1,0 @@
-"""TotalConnect constants."""
-
-DOMAIN = "totalconnect"
