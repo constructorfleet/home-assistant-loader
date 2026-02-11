@@ -628,8 +628,8 @@ class CompositeSelector(Selector[CompositeSelectorConfig]):
     """Selector for a composite of multiple fields.
 
     The CompositeSelector allows grouping multiple fields with different selectors
-    into a single composite object. Extra fields not defined in the schema are
-    preserved to allow for extensibility.
+    into a single composite object. Only fields defined in the schema are allowed;
+    extra fields will be rejected with a validation error.
     """
 
     selector_type = "composite"
@@ -687,6 +687,13 @@ class CompositeSelector(Selector[CompositeSelectorConfig]):
             if not isinstance(item, dict):
                 raise vol.Invalid("Each item should be a dict")
 
+            # Check for extra fields not in the schema
+            extra_fields = set(item.keys()) - set(self.config["schema"].keys())
+            if extra_fields:
+                raise vol.Invalid(
+                    f"Extra fields not allowed: {', '.join(sorted(extra_fields))}"
+                )
+
             validated_item = {}
             for field, field_data in self.config["schema"].items():
                 if field_data.get("required", False) and field not in item:
@@ -698,11 +705,6 @@ class CompositeSelector(Selector[CompositeSelectorConfig]):
                 elif "default" in field_data:
                     # Use default value if field is not provided
                     validated_item[field] = field_data["default"]
-
-            # Copy over any extra fields that aren't in the schema
-            for field in item:
-                if field not in self.config["schema"]:
-                    validated_item[field] = item[field]
 
             validated_data.append(validated_item)
 

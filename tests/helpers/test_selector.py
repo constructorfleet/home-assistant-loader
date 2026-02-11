@@ -1636,6 +1636,7 @@ def test_rgb_color_selector_schema(
                 {"age": 30},
                 {"name": "John", "age": 200},
                 [{"name": "John"}],
+                {"name": "John", "extra_field": "not allowed"},
             ),
         ),
         (
@@ -1661,6 +1662,7 @@ def test_rgb_color_selector_schema(
                 {"name": "John"},
                 [{}],
                 [{"age": 30}],
+                [{"name": "John", "extra": "field"}],
             ),
         ),
         (
@@ -1739,6 +1741,38 @@ def test_composite_selector_serialize(snapshot: SnapshotAssertion) -> None:
         }
     )
     assert composite_selector_with_instances.serialize() == snapshot
+
+
+def test_composite_selector_rejects_extra_fields() -> None:
+    """Test that CompositeSelector rejects extra fields not in schema."""
+    composite_selector = selector.CompositeSelector(
+        {
+            "schema": {
+                "name": {
+                    "required": True,
+                    "selector": {"text": {}},
+                },
+                "age": {
+                    "selector": {"number": {"min": 0, "max": 150}},
+                },
+            },
+        }
+    )
+
+    # Valid data with only defined fields
+    valid_data = {"name": "John", "age": 30}
+    result = composite_selector(valid_data)
+    assert result == valid_data
+
+    # Invalid data with extra field
+    with pytest.raises(vol.Invalid) as exc_info:
+        composite_selector({"name": "John", "age": 30, "extra": "field"})
+    assert "Extra fields not allowed: extra" in str(exc_info.value)
+
+    # Invalid data with multiple extra fields
+    with pytest.raises(vol.Invalid) as exc_info:
+        composite_selector({"name": "John", "extra1": "field1", "extra2": "field2"})
+    assert "Extra fields not allowed:" in str(exc_info.value)
 
 
 @pytest.mark.parametrize(
