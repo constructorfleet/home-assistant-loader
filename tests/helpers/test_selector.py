@@ -1609,6 +1609,226 @@ def test_rgb_color_selector_schema(
     ("schema", "valid_selections", "invalid_selections"),
     [
         (
+            {
+                "schema": {
+                    "name": {
+                        "required": True,
+                        "selector": {"text": {}},
+                    },
+                    "age": {
+                        "selector": {"number": {"min": 0, "max": 150}},
+                    },
+                },
+            },
+            (
+                {"name": "John", "age": 30},
+                {"name": "Jane"},
+            ),
+            (
+                "not_a_dict",
+                None,
+                {},
+                {"age": 30},
+                {"name": "John", "age": 200},
+                [{"name": "John"}],
+                {"name": "John", "extra_field": "not allowed"},
+            ),
+        ),
+        (
+            {
+                "schema": {
+                    "name": {
+                        "required": True,
+                        "selector": {"text": {}},
+                    },
+                    "age": {
+                        "selector": {"number": {"min": 0, "max": 150}},
+                    },
+                },
+                "multiple": True,
+            },
+            (
+                [{"name": "John", "age": 30}, {"name": "Jane", "age": 25}],
+                [{"name": "John"}],
+            ),
+            (
+                "not_a_dict",
+                None,
+                {"name": "John"},
+                [{}],
+                [{"age": 30}],
+                [{"name": "John", "extra": "field"}],
+            ),
+        ),
+        (
+            {
+                "schema": {
+                    "field1": {
+                        "advanced": True,
+                        "default": "default_value",
+                        "description": "Field 1 description",
+                        "example": "example1",
+                        "name": "Field 1",
+                        "selector": {"text": {}},
+                    },
+                    "field2": {
+                        "required": True,
+                        "selector": {"boolean": {}},
+                    },
+                },
+            },
+            (
+                {"field1": "test", "field2": True},
+                {"field2": False},
+            ),
+            (
+                "not_a_dict",
+                {"field1": "test"},
+                {},
+            ),
+        ),
+    ],
+)
+def test_composite_selector_schema(
+    schema, valid_selections, invalid_selections
+) -> None:
+    """Test composite selector."""
+    _test_selector("composite", schema, valid_selections, invalid_selections)
+
+
+def test_composite_selector_serialize(snapshot: SnapshotAssertion) -> None:
+    """Test composite selector serialization."""
+    # Test with dict-based selectors
+    composite_selector = selector.CompositeSelector(
+        {
+            "schema": {
+                "name": {
+                    "required": True,
+                    "selector": {"text": {"multiline": False}},
+                },
+                "age": {
+                    "selector": {"number": {"min": 0, "max": 150}},
+                },
+                "enabled": {
+                    "selector": {"boolean": {}},
+                },
+            },
+            "multiple": False,
+        }
+    )
+    assert composite_selector.serialize() == snapshot
+
+    # Test with Selector instances
+    composite_selector_with_instances = selector.CompositeSelector(
+        {
+            "schema": {
+                "name": {
+                    "required": True,
+                    "selector": selector.TextSelector(),
+                },
+                "age": {
+                    "selector": selector.NumberSelector(
+                        selector.NumberSelectorConfig(min=0, max=150)
+                    ),
+                },
+            },
+            "multiple": True,
+        }
+    )
+    assert composite_selector_with_instances.serialize() == snapshot
+
+
+def test_composite_selector_rejects_extra_fields() -> None:
+    """Test that CompositeSelector rejects extra fields not in schema."""
+    composite_selector = selector.CompositeSelector(
+        {
+            "schema": {
+                "name": {
+                    "required": True,
+                    "selector": {"text": {}},
+                },
+                "age": {
+                    "selector": {"number": {"min": 0, "max": 150}},
+                },
+            },
+        }
+    )
+
+    # Valid data with only defined fields
+    valid_data = {"name": "John", "age": 30}
+    result = composite_selector(valid_data)
+    assert result == valid_data
+
+    # Invalid data with extra field
+    with pytest.raises(vol.Invalid) as exc_info:
+        composite_selector({"name": "John", "age": 30, "extra": "field"})
+    assert "Extra fields not allowed: extra" in str(exc_info.value)
+
+    # Invalid data with multiple extra fields
+    with pytest.raises(vol.Invalid) as exc_info:
+        composite_selector({"name": "John", "extra1": "field1", "extra2": "field2"})
+    assert "Extra fields not allowed:" in str(exc_info.value)
+
+
+def test_composite_selector_rejects_extra_schema_fields() -> None:
+    """Test that CompositeSelector rejects extra fields in field schema."""
+    # Valid schema with allowed fields
+    valid_schema = {
+        "schema": {
+            "name": {
+                "required": True,
+                "advanced": False,
+                "default": "test",
+                "description": "A name field",
+                "example": "John",
+                "name": "Name",
+                "selector": {"text": {}},
+            }
+        }
+    }
+    selector.validate_selector({"composite": valid_schema})
+
+    # Invalid schema with extra field in field definition
+    invalid_schema = {
+        "schema": {
+            "name": {
+                "required": True,
+                "selector": {"text": {}},
+                "invalid_field": "should not be allowed",
+            }
+        }
+    }
+    with pytest.raises(vol.Invalid) as exc_info:
+        selector.validate_selector({"composite": invalid_schema})
+    assert "extra keys not allowed" in str(exc_info.value).lower()
+
+
+def test_composite_selector_requires_schema() -> None:
+    """Test that CompositeSelector requires schema field."""
+    # Schema is required - missing schema should fail validation
+    with pytest.raises(vol.Invalid) as exc_info:
+        selector.validate_selector({"composite": {}})
+    assert "required key not provided" in str(exc_info.value).lower()
+
+    # Schema is required - explicit None should fail validation
+    with pytest.raises(vol.Invalid) as exc_info:
+        selector.validate_selector({"composite": {"schema": None}})
+
+    # Valid schema with at least one field should work
+    valid_schema = {
+        "schema": {
+            "field1": {
+                "selector": {"text": {}},
+            }
+        }
+    }
+    selector.validate_selector({"composite": valid_schema})
+
+
+@pytest.mark.parametrize(
+    ("schema", "valid_selections", "invalid_selections"),
+    [
+        (
             {},
             (100, 100.0),
             (None, "abc", [100]),

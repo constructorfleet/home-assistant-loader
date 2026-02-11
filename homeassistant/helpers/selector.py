@@ -604,6 +604,114 @@ class ColorTempSelector(Selector[ColorTempSelectorConfig]):
         return value
 
 
+class CompositeSelectorField(TypedDict, total=False):
+    """Class to represent a composite selector field config."""
+
+    advanced: bool
+    default: Any
+    description: str
+    example: str
+    name: str
+    required: bool
+    selector: Required[Selector | dict[str, Any]]
+
+
+class CompositeSelectorConfig(BaseSelectorConfig, total=False):
+    """Class to represent a composite selector config."""
+
+    multiple: bool
+    schema: Required[dict[str, CompositeSelectorField]]
+
+
+@SELECTORS.register("composite")
+class CompositeSelector(Selector[CompositeSelectorConfig]):
+    """Selector for a composite of multiple fields.
+
+    The CompositeSelector allows grouping multiple fields with different selectors
+    into a single composite object. Only fields defined in the schema are allowed;
+    extra fields will be rejected with a validation error.
+    """
+
+    selector_type = "composite"
+
+    CONFIG_SCHEMA = make_selector_config_schema(
+        {
+            vol.Optional("multiple", default=False): bool,
+            vol.Required("schema"): {
+                cv.slug: vol.Schema(
+                    {
+                        vol.Optional("advanced", default=False): cv.boolean,
+                        vol.Optional("default"): cv.match_all,
+                        vol.Optional("description"): cv.string,
+                        vol.Optional("example"): cv.string,
+                        vol.Optional("name"): cv.string,
+                        vol.Optional("required", default=False): cv.boolean,
+                        vol.Required("selector"): vol.Any(Selector, validate_selector),
+                    },
+                    extra=vol.PREVENT_EXTRA,
+                )
+            },
+        }
+    )
+
+    def __init__(self, config: CompositeSelectorConfig | None = None) -> None:
+        """Instantiate a selector."""
+        super().__init__(config)
+
+    def serialize(self) -> dict[str, dict[str, CompositeSelectorConfig]]:
+        """Serialize CompositeSelector for voluptuous_serialize."""
+        _config = deepcopy(self.config)
+        if "schema" in _config:
+            for field_items in _config["schema"].values():
+                if isinstance(field_items["selector"], Selector):
+                    field_items["selector"] = field_items["selector"].serialize()[
+                        "selector"
+                    ]
+        return {"selector": {self.selector_type: _config}}
+
+    def __call__(self, data: Any) -> Any:
+        """Validate the passed selection."""
+        # Always validate data structure
+        if not isinstance(data, (list, dict)):
+            raise vol.Invalid("Value should be a dict or a list of dicts")
+        if isinstance(data, list) and not self.config.get("multiple", False):
+            raise vol.Invalid("Value should not be a list")
+        if not isinstance(data, list) and self.config.get("multiple", False):
+            raise vol.Invalid("Value should be a list")
+
+        test_data = data if isinstance(data, list) else [data]
+        validated_data = []
+
+        for item in test_data:
+            if not isinstance(item, dict):
+                raise vol.Invalid("Each item should be a dict")
+
+            # Check for extra fields not in the schema
+            extra_fields = set(item.keys()) - set(self.config["schema"].keys())
+            if extra_fields:
+                raise vol.Invalid(
+                    f"Extra fields not allowed: {', '.join(sorted(extra_fields))}"
+                )
+
+            validated_item = {}
+            for field, field_data in self.config["schema"].items():
+                if field_data.get("required", False) and field not in item:
+                    raise vol.Invalid(f"Required field '{field}' is missing")
+
+                if field in item:
+                    # Validate the field value using its selector
+                    validated_item[field] = selector(field_data["selector"])(
+                        item[field]
+                    )  # type: ignore[operator]
+                elif "default" in field_data:
+                    # Use default value if field is not provided
+                    validated_item[field] = field_data["default"]
+
+            validated_data.append(validated_item)
+
+        return validated_data if isinstance(data, list) else validated_data[0]
+
+
 class ConditionSelectorConfig(BaseSelectorConfig):
     """Class to represent an condition selector config."""
 
