@@ -625,7 +625,12 @@ class CompositeSelectorConfig(BaseSelectorConfig, total=False):
 
 @SELECTORS.register("composite")
 class CompositeSelector(Selector[CompositeSelectorConfig]):
-    """Selector for a composite of multiple fields."""
+    """Selector for a composite of multiple fields.
+
+    The CompositeSelector allows grouping multiple fields with different selectors
+    into a single composite object. Extra fields not defined in the schema are
+    preserved to allow for extensibility.
+    """
 
     selector_type = "composite"
 
