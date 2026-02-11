@@ -1813,7 +1813,7 @@ def test_composite_selector_requires_schema() -> None:
     # Schema is required - explicit None should fail validation
     with pytest.raises(vol.Invalid) as exc_info:
         selector.validate_selector({"composite": {"schema": None}})
-    
+
     # Valid schema with at least one field should work
     valid_schema = {
         "schema": {
