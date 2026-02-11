@@ -638,15 +638,18 @@ class CompositeSelector(Selector[CompositeSelectorConfig]):
         {
             vol.Optional("multiple", default=False): bool,
             vol.Optional("schema"): {
-                cv.slug: {
-                    vol.Optional("advanced", default=False): cv.boolean,
-                    vol.Optional("default"): cv.match_all,
-                    vol.Optional("description"): cv.string,
-                    vol.Optional("example"): cv.string,
-                    vol.Optional("name"): cv.string,
-                    vol.Optional("required", default=False): cv.boolean,
-                    vol.Required("selector"): vol.Any(Selector, validate_selector),
-                }
+                cv.slug: vol.Schema(
+                    {
+                        vol.Optional("advanced", default=False): cv.boolean,
+                        vol.Optional("default"): cv.match_all,
+                        vol.Optional("description"): cv.string,
+                        vol.Optional("example"): cv.string,
+                        vol.Optional("name"): cv.string,
+                        vol.Optional("required", default=False): cv.boolean,
+                        vol.Required("selector"): vol.Any(Selector, validate_selector),
+                    },
+                    extra=vol.PREVENT_EXTRA,
+                )
             },
         }
     )

@@ -1775,6 +1775,39 @@ def test_composite_selector_rejects_extra_fields() -> None:
     assert "Extra fields not allowed:" in str(exc_info.value)
 
 
+def test_composite_selector_rejects_extra_schema_fields() -> None:
+    """Test that CompositeSelector rejects extra fields in field schema."""
+    # Valid schema with allowed fields
+    valid_schema = {
+        "schema": {
+            "name": {
+                "required": True,
+                "advanced": False,
+                "default": "test",
+                "description": "A name field",
+                "example": "John",
+                "name": "Name",
+                "selector": {"text": {}},
+            }
+        }
+    }
+    selector.validate_selector({"composite": valid_schema})
+
+    # Invalid schema with extra field in field definition
+    invalid_schema = {
+        "schema": {
+            "name": {
+                "required": True,
+                "selector": {"text": {}},
+                "invalid_field": "should not be allowed",
+            }
+        }
+    }
+    with pytest.raises(vol.Invalid) as exc_info:
+        selector.validate_selector({"composite": invalid_schema})
+    assert "extra keys not allowed" in str(exc_info.value).lower()
+
+
 @pytest.mark.parametrize(
     ("schema", "valid_selections", "invalid_selections"),
     [
