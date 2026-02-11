@@ -342,7 +342,7 @@ class MathExtension(BaseTemplateExtension):
             value_num = float(value)
             min_value_num = float(min_value)
             max_value_num = float(max_value)
-        except ValueError, TypeError as err:
+        except (ValueError, TypeError) as err:
             raise ValueError(
                 f"function requires numeric arguments, "
                 f"got {value=}, {min_value=}, {max_value=}"
@@ -359,7 +359,7 @@ class MathExtension(BaseTemplateExtension):
             value_num = float(value)
             min_value_num = float(min_value)
             max_value_num = float(max_value)
-        except ValueError, TypeError as err:
+        except (ValueError, TypeError) as err:
             raise ValueError(
                 f"function requires numeric arguments, "
                 f"got {value=}, {min_value=}, {max_value=}"
@@ -400,7 +400,7 @@ class MathExtension(BaseTemplateExtension):
             in_max_num = float(in_max)
             out_min_num = float(out_min)
             out_max_num = float(out_max)
-        except ValueError, TypeError as err:
+        except (ValueError, TypeError) as err:
             raise ValueError(
                 f"function requires numeric arguments, "
                 f"got {value=}, {in_min=}, {in_max=}, {out_min=}, {out_max=}"
