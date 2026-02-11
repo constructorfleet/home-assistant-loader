@@ -604,6 +604,88 @@ class ColorTempSelector(Selector[ColorTempSelectorConfig]):
         return value
 
 
+class CompositeSelectorField(TypedDict, total=False):
+    """Class to represent a composite selector field config."""
+
+    advanced: bool
+    default: Any
+    description: str
+    example: str
+    name: str
+    required: bool
+    selector: Required[Selector | dict[str, Any]]
+
+
+class CompositeSelectorConfig(BaseSelectorConfig, total=False):
+    """Class to represent a composite selector config."""
+
+    multiple: bool
+    schema: dict[str, CompositeSelectorField]
+
+
+@SELECTORS.register("composite")
+class CompositeSelector(Selector[CompositeSelectorConfig]):
+    """Selector for a composite of multiple fields."""
+
+    selector_type = "composite"
+
+    CONFIG_SCHEMA = make_selector_config_schema(
+        {
+            vol.Optional("multiple", default=False): bool,
+            vol.Optional("schema"): {
+                cv.slug: {
+                    vol.Optional("advanced", default=False): cv.boolean,
+                    vol.Optional("default"): cv.match_all,
+                    vol.Optional("description"): cv.string,
+                    vol.Optional("example"): cv.string,
+                    vol.Optional("name"): cv.string,
+                    vol.Optional("required", default=False): cv.boolean,
+                    vol.Required("selector"): vol.Any(Selector, validate_selector),
+                }
+            },
+        }
+    )
+
+    def __init__(self, config: CompositeSelectorConfig | None = None) -> None:
+        """Instantiate a selector."""
+        super().__init__(config)
+
+    def serialize(self) -> dict[str, dict[str, CompositeSelectorConfig]]:
+        """Serialize CompositeSelector for voluptuous_serialize."""
+        _config = deepcopy(self.config)
+        if "schema" in _config:
+            for field_items in _config["schema"].values():
+                if isinstance(field_items["selector"], Selector):
+                    field_items["selector"] = field_items["selector"].serialize()[
+                        "selector"
+                    ]
+        return {"selector": {self.selector_type: _config}}
+
+    def __call__(self, data: Any) -> Any:
+        """Validate the passed selection."""
+        if "schema" not in self.config:
+            # Return data if no schema is defined
+            return data
+
+        if not isinstance(data, (list, dict)):
+            raise vol.Invalid("Value should be a dict or a list of dicts")
+        if isinstance(data, list) and not self.config.get("multiple", False):
+            raise vol.Invalid("Value should not be a list")
+
+        test_data = data if isinstance(data, list) else [data]
+
+        for _config in test_data:
+            for field, field_data in self.config["schema"].items():
+                if field_data.get("required", False) and field not in _config:
+                    raise vol.Invalid(f"Required field '{field}' is missing")
+
+                if field in _config:
+                    # Validate the field value using its selector
+                    _config[field] = selector(field_data["selector"])(_config[field])
+
+        return data
+
+
 class ConditionSelectorConfig(BaseSelectorConfig):
     """Class to represent an condition selector config."""
 

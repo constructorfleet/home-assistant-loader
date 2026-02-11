@@ -1610,6 +1610,142 @@ def test_rgb_color_selector_schema(
     [
         (
             {},
+            ({"field1": "value1"},),
+            ("not_a_dict", None),
+        ),
+        (
+            {
+                "schema": {
+                    "name": {
+                        "required": True,
+                        "selector": {"text": {}},
+                    },
+                    "age": {
+                        "selector": {"number": {"min": 0, "max": 150}},
+                    },
+                },
+            },
+            (
+                {"name": "John", "age": 30},
+                {"name": "Jane"},
+            ),
+            (
+                "not_a_dict",
+                None,
+                {},
+                {"age": 30},
+                {"name": "John", "age": 200},
+                [{"name": "John"}],
+            ),
+        ),
+        (
+            {
+                "schema": {
+                    "name": {
+                        "required": True,
+                        "selector": {"text": {}},
+                    },
+                    "age": {
+                        "selector": {"number": {"min": 0, "max": 150}},
+                    },
+                },
+                "multiple": True,
+            },
+            (
+                [{"name": "John", "age": 30}, {"name": "Jane", "age": 25}],
+                [{"name": "John"}],
+            ),
+            (
+                "not_a_dict",
+                None,
+                {"name": "John"},
+                [{}],
+                [{"age": 30}],
+            ),
+        ),
+        (
+            {
+                "schema": {
+                    "field1": {
+                        "advanced": True,
+                        "default": "default_value",
+                        "description": "Field 1 description",
+                        "example": "example1",
+                        "name": "Field 1",
+                        "selector": {"text": {}},
+                    },
+                    "field2": {
+                        "required": True,
+                        "selector": {"boolean": {}},
+                    },
+                },
+            },
+            (
+                {"field1": "test", "field2": True},
+                {"field2": False},
+            ),
+            (
+                "not_a_dict",
+                {"field1": "test"},
+                {},
+            ),
+        ),
+    ],
+)
+def test_composite_selector_schema(
+    schema, valid_selections, invalid_selections
+) -> None:
+    """Test composite selector."""
+    _test_selector("composite", schema, valid_selections, invalid_selections)
+
+
+def test_composite_selector_serialize(snapshot: SnapshotAssertion) -> None:
+    """Test composite selector serialization."""
+    # Test with dict-based selectors
+    composite_selector = selector.CompositeSelector(
+        {
+            "schema": {
+                "name": {
+                    "required": True,
+                    "selector": {"text": {"multiline": False}},
+                },
+                "age": {
+                    "selector": {"number": {"min": 0, "max": 150}},
+                },
+                "enabled": {
+                    "selector": {"boolean": {}},
+                },
+            },
+            "multiple": False,
+        }
+    )
+    assert composite_selector.serialize() == snapshot
+
+    # Test with Selector instances
+    composite_selector_with_instances = selector.CompositeSelector(
+        {
+            "schema": {
+                "name": {
+                    "required": True,
+                    "selector": selector.TextSelector(),
+                },
+                "age": {
+                    "selector": selector.NumberSelector(
+                        selector.NumberSelectorConfig(min=0, max=150)
+                    ),
+                },
+            },
+            "multiple": True,
+        }
+    )
+    assert composite_selector_with_instances.serialize() == snapshot
+
+
+@pytest.mark.parametrize(
+    ("schema", "valid_selections", "invalid_selections"),
+    [
+        (
+            {},
             (100, 100.0),
             (None, "abc", [100]),
         ),
