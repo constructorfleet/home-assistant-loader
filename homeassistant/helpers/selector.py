@@ -700,7 +700,7 @@ class CompositeSelector(Selector[CompositeSelectorConfig]):
 
                 if field in item:
                     # Validate the field value using its selector
-                    validated_item[field] = selector(field_data["selector"])(item[field])
+                    validated_item[field] = selector(field_data["selector"])(item[field])  # type: ignore[operator]
                 elif "default" in field_data:
                     # Use default value if field is not provided
                     validated_item[field] = field_data["default"]
