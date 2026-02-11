@@ -663,27 +663,45 @@ class CompositeSelector(Selector[CompositeSelectorConfig]):
 
     def __call__(self, data: Any) -> Any:
         """Validate the passed selection."""
-        if "schema" not in self.config:
-            # Return data if no schema is defined
-            return data
-
+        # Always validate data structure
         if not isinstance(data, (list, dict)):
             raise vol.Invalid("Value should be a dict or a list of dicts")
         if isinstance(data, list) and not self.config.get("multiple", False):
             raise vol.Invalid("Value should not be a list")
+        if not isinstance(data, list) and self.config.get("multiple", False):
+            raise vol.Invalid("Value should be a list")
+
+        if "schema" not in self.config:
+            # Return data if no schema is defined
+            return data
 
         test_data = data if isinstance(data, list) else [data]
+        validated_data = []
 
-        for _config in test_data:
+        for item in test_data:
+            if not isinstance(item, dict):
+                raise vol.Invalid("Each item should be a dict")
+
+            validated_item = {}
             for field, field_data in self.config["schema"].items():
-                if field_data.get("required", False) and field not in _config:
+                if field_data.get("required", False) and field not in item:
                     raise vol.Invalid(f"Required field '{field}' is missing")
 
-                if field in _config:
+                if field in item:
                     # Validate the field value using its selector
-                    _config[field] = selector(field_data["selector"])(_config[field])
+                    validated_item[field] = selector(field_data["selector"])(item[field])
+                elif "default" in field_data:
+                    # Use default value if field is not provided
+                    validated_item[field] = field_data["default"]
 
-        return data
+            # Copy over any extra fields that aren't in the schema
+            for field in item:
+                if field not in self.config["schema"]:
+                    validated_item[field] = item[field]
+
+            validated_data.append(validated_item)
+
+        return validated_data if isinstance(data, list) else validated_data[0]
 
 
 class ConditionSelectorConfig(BaseSelectorConfig):
