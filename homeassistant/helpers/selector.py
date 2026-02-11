@@ -620,7 +620,7 @@ class CompositeSelectorConfig(BaseSelectorConfig, total=False):
     """Class to represent a composite selector config."""
 
     multiple: bool
-    schema: dict[str, CompositeSelectorField]
+    schema: Required[dict[str, CompositeSelectorField]]
 
 
 @SELECTORS.register("composite")
@@ -637,7 +637,7 @@ class CompositeSelector(Selector[CompositeSelectorConfig]):
     CONFIG_SCHEMA = make_selector_config_schema(
         {
             vol.Optional("multiple", default=False): bool,
-            vol.Optional("schema"): {
+            vol.Required("schema"): {
                 cv.slug: vol.Schema(
                     {
                         vol.Optional("advanced", default=False): cv.boolean,
@@ -678,10 +678,6 @@ class CompositeSelector(Selector[CompositeSelectorConfig]):
             raise vol.Invalid("Value should not be a list")
         if not isinstance(data, list) and self.config.get("multiple", False):
             raise vol.Invalid("Value should be a list")
-
-        if "schema" not in self.config:
-            # Return data if no schema is defined
-            return data
 
         test_data = data if isinstance(data, list) else [data]
         validated_data = []

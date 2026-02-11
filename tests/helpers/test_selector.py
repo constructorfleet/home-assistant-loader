@@ -1609,11 +1609,6 @@ def test_rgb_color_selector_schema(
     ("schema", "valid_selections", "invalid_selections"),
     [
         (
-            {},
-            ({"field1": "value1"},),
-            ("not_a_dict", None),
-        ),
-        (
             {
                 "schema": {
                     "name": {
@@ -1806,6 +1801,28 @@ def test_composite_selector_rejects_extra_schema_fields() -> None:
     with pytest.raises(vol.Invalid) as exc_info:
         selector.validate_selector({"composite": invalid_schema})
     assert "extra keys not allowed" in str(exc_info.value).lower()
+
+
+def test_composite_selector_requires_schema() -> None:
+    """Test that CompositeSelector requires schema field."""
+    # Schema is required - missing schema should fail validation
+    with pytest.raises(vol.Invalid) as exc_info:
+        selector.validate_selector({"composite": {}})
+    assert "required key not provided" in str(exc_info.value).lower()
+
+    # Schema is required - explicit None should fail validation
+    with pytest.raises(vol.Invalid) as exc_info:
+        selector.validate_selector({"composite": {"schema": None}})
+    
+    # Valid schema with at least one field should work
+    valid_schema = {
+        "schema": {
+            "field1": {
+                "selector": {"text": {}},
+            }
+        }
+    }
+    selector.validate_selector({"composite": valid_schema})
 
 
 @pytest.mark.parametrize(
