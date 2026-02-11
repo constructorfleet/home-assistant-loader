@@ -89,14 +89,14 @@ class MathExtension(BaseTemplateExtension):
         """Filter and function to get logarithm of the value with a specific base."""
         try:
             base_float = float(base)
-        except (ValueError, TypeError):
+        except ValueError, TypeError:
             if default is _SENTINEL:
                 raise_no_default("log", base)
             return default
         try:
             value_float = float(value)
             return math.log(value_float, base_float)
-        except (ValueError, TypeError):
+        except ValueError, TypeError:
             if default is _SENTINEL:
                 raise_no_default("log", value)
             return default
@@ -106,7 +106,7 @@ class MathExtension(BaseTemplateExtension):
         """Filter and function to get sine of the value."""
         try:
             return math.sin(float(value))
-        except (ValueError, TypeError):
+        except ValueError, TypeError:
             if default is _SENTINEL:
                 raise_no_default("sin", value)
             return default
@@ -116,7 +116,7 @@ class MathExtension(BaseTemplateExtension):
         """Filter and function to get cosine of the value."""
         try:
             return math.cos(float(value))
-        except (ValueError, TypeError):
+        except ValueError, TypeError:
             if default is _SENTINEL:
                 raise_no_default("cos", value)
             return default
@@ -126,7 +126,7 @@ class MathExtension(BaseTemplateExtension):
         """Filter and function to get tangent of the value."""
         try:
             return math.tan(float(value))
-        except (ValueError, TypeError):
+        except ValueError, TypeError:
             if default is _SENTINEL:
                 raise_no_default("tan", value)
             return default
@@ -136,7 +136,7 @@ class MathExtension(BaseTemplateExtension):
         """Filter and function to get arc sine of the value."""
         try:
             return math.asin(float(value))
-        except (ValueError, TypeError):
+        except ValueError, TypeError:
             if default is _SENTINEL:
                 raise_no_default("asin", value)
             return default
@@ -146,7 +146,7 @@ class MathExtension(BaseTemplateExtension):
         """Filter and function to get arc cosine of the value."""
         try:
             return math.acos(float(value))
-        except (ValueError, TypeError):
+        except ValueError, TypeError:
             if default is _SENTINEL:
                 raise_no_default("acos", value)
             return default
@@ -156,7 +156,7 @@ class MathExtension(BaseTemplateExtension):
         """Filter and function to get arc tangent of the value."""
         try:
             return math.atan(float(value))
-        except (ValueError, TypeError):
+        except ValueError, TypeError:
             if default is _SENTINEL:
                 raise_no_default("atan", value)
             return default
@@ -179,7 +179,7 @@ class MathExtension(BaseTemplateExtension):
                 default = args[2]
 
             return math.atan2(float(args[0]), float(args[1]))
-        except (ValueError, TypeError):
+        except ValueError, TypeError:
             if default is _SENTINEL:
                 raise_no_default("atan2", args)
             return default
@@ -189,7 +189,7 @@ class MathExtension(BaseTemplateExtension):
         """Filter and function to get square root of the value."""
         try:
             return math.sqrt(float(value))
-        except (ValueError, TypeError):
+        except ValueError, TypeError:
             if default is _SENTINEL:
                 raise_no_default("sqrt", value)
             return default
@@ -342,7 +342,7 @@ class MathExtension(BaseTemplateExtension):
             value_num = float(value)
             min_value_num = float(min_value)
             max_value_num = float(max_value)
-        except (ValueError, TypeError) as err:
+        except ValueError, TypeError as err:
             raise ValueError(
                 f"function requires numeric arguments, "
                 f"got {value=}, {min_value=}, {max_value=}"
@@ -359,7 +359,7 @@ class MathExtension(BaseTemplateExtension):
             value_num = float(value)
             min_value_num = float(min_value)
             max_value_num = float(max_value)
-        except (ValueError, TypeError) as err:
+        except ValueError, TypeError as err:
             raise ValueError(
                 f"function requires numeric arguments, "
                 f"got {value=}, {min_value=}, {max_value=}"
@@ -400,7 +400,7 @@ class MathExtension(BaseTemplateExtension):
             in_max_num = float(in_max)
             out_min_num = float(out_min)
             out_max_num = float(out_max)
-        except (ValueError, TypeError) as err:
+        except ValueError, TypeError as err:
             raise ValueError(
                 f"function requires numeric arguments, "
                 f"got {value=}, {in_min=}, {in_max=}, {out_min=}, {out_max=}"
